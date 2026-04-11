@@ -195,7 +195,61 @@ void show_account_details(void) {
 
 // Deposit / withdraw
 void do_transaction(void) {
-    printf("Transaction (not implemented yet).\n");
+    if (!IS_LOGGED_IN) {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    Account accounts[MAX_ACCOUNTS];
+    int count = load_accounts(accounts, MAX_ACCOUNTS);
+
+    char buf[64];
+    printf("Enter account number: ");
+    read_line(buf, sizeof(buf));
+    if (!is_number(buf)) {
+        printf("Invalid account number.\n");
+        return;
+    }
+    int target = atoi(buf);
+
+    int index = -1;
+    for (int i = 0; i < count; i++) {
+        if (accounts[i].account_id == target &&
+            accounts[i].user_id == ACTIVE_USER.id) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf("Account not found.\n");
+        return;
+    }
+
+    Account *a = &accounts[index];
+
+    printf("Enter amount (+deposit / -withdraw): ");
+    read_line(buf, sizeof(buf));
+
+    double amount = 0;
+    if (sscanf(buf, "%lf", &amount) != 1) {
+        printf("Invalid amount.\n");
+        return;
+    }
+
+    if (amount < 0 && a->balance + amount < 0) {
+        printf("Insufficient funds.\n");
+        return;
+    }
+
+    a->balance += amount;
+
+    if (!rewrite_accounts(accounts, count)) {
+        printf("Error saving transaction.\n");
+        return;
+    }
+
+    printf("Transaction successful. New balance: %.2f\n", a->balance);
 }
 
 // Delete an account
