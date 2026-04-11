@@ -1,0 +1,24 @@
+# Build artifacts
+/build/
+/*.o
+*.o
+*.a
+*.so
+*.out
+*.exe
+
+# Final binary
+atm
+
+# macOS / Windows junk
+.DS_Store
+Thumbs.db
+
+# Editor temp files
+*.swp
+*.swo
+*~
+*.tmp
+
+# Debug symbols
+*.dSYM/
