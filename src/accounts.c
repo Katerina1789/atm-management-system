@@ -89,7 +89,57 @@ void list_accounts(void) {
 
 // Update an existing account
 void update_account(void) {
-    printf("Update account (not implemented yet).\n");
+    if (!IS_LOGGED_IN) {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    Account accounts[MAX_ACCOUNTS];
+    int count = load_accounts(accounts, MAX_ACCOUNTS);
+
+    char buf[64];
+    printf("Enter account number to update: ");
+    read_line(buf, sizeof(buf));
+    if (!is_number(buf)) {
+        printf("Invalid account number.\n");
+        return;
+    }
+    int target = atoi(buf);
+
+    int index = -1;
+    for (int i = 0; i < count; i++) {
+        if (accounts[i].account_id == target &&
+            accounts[i].user_id == ACTIVE_USER.id) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf("Account not found.\n");
+        return;
+    }
+
+    Account *a = &accounts[index];
+
+    printf("New country (leave empty to keep): ");
+    read_line(buf, sizeof(buf));
+    if (strlen(buf) > 0) strcpy(a->country, buf);
+
+    printf("New phone (leave empty to keep): ");
+    read_line(buf, sizeof(buf));
+    if (strlen(buf) > 0) strcpy(a->phone, buf);
+
+    printf("New account type (leave empty to keep): ");
+    read_line(buf, sizeof(buf));
+    if (strlen(buf) > 0) strcpy(a->type, buf);
+
+    if (!rewrite_accounts(accounts, count)) {
+        printf("Error saving changes.\n");
+        return;
+    }
+
+    printf("Account updated successfully.\n");
 }
 
 // Show account details with interest
