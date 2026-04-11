@@ -142,7 +142,7 @@ void update_account(void) {
     printf("Account updated successfully.\n");
 }
 
-// Show account details with interest
+// Show account details and interest information
 void show_account_details(void) {
     if (!IS_LOGGED_IN) {
         printf("You must be logged in.\n");
@@ -177,20 +177,50 @@ void show_account_details(void) {
 
     Account *a = &accounts[index];
 
-    double rate = 0.0;
-    if (strcmp(a->type, "saving") == 0) rate = 0.05;
-    if (strcmp(a->type, "current") == 0) rate = 0.02;
-    if (strcmp(a->type, "fixed") == 0) rate = 0.07;
-
-    double interest = a->balance * rate;
-
     printf("\nAccount ID: %d\n", a->account_id);
     printf("Type: %s\n", a->type);
     printf("Balance: %.2f\n", a->balance);
-    printf("Interest: %.2f\n", interest);
     printf("Country: %s\n", a->country);
     printf("Phone: %s\n", a->phone);
     printf("Date: %s\n", a->date);
+
+    int day = 0, month = 0, year = 0;
+    sscanf(a->date, "%d/%d/%d", &day, &month, &year);
+
+    double interest = 0.0;
+
+    if (strcmp(a->type, "saving") == 0 || strcmp(a->type, "savings") == 0) {
+        interest = a->balance * 0.07;
+        printf("You will get $%.2f as interest on day %d of every month.\n",
+               interest, day);
+        return;
+    }
+
+    if (strcmp(a->type, "fixed01") == 0) {
+        interest = a->balance * 0.04;
+        printf("You will get $%.2f as interest on %02d/%02d/%04d.\n",
+               interest, day, month, year + 1);
+        return;
+    }
+
+    if (strcmp(a->type, "fixed02") == 0) {
+        interest = a->balance * 0.05;
+        printf("You will get $%.2f as interest on %02d/%02d/%04d.\n",
+               interest, day, month, year + 2);
+        return;
+    }
+
+    if (strcmp(a->type, "fixed03") == 0) {
+        interest = a->balance * 0.08;
+        printf("You will get $%.2f as interest on %02d/%02d/%04d.\n",
+               interest, day, month, year + 3);
+        return;
+    }
+
+    if (strcmp(a->type, "current") == 0) {
+        printf("You will not get interests because the account is of type current.\n");
+        return;
+    }
 }
 
 // Deposit / withdraw
