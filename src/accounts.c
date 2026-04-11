@@ -60,7 +60,31 @@ void create_account(void) {
 
 // List accounts for active user
 void list_accounts(void) {
-    printf("List accounts (not implemented yet).\n");
+    if (!IS_LOGGED_IN) {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    Account accounts[MAX_ACCOUNTS];
+    int count = load_accounts(accounts, MAX_ACCOUNTS);
+
+    int found = 0;
+
+    for (int i = 0; i < count; i++) {
+        if (accounts[i].user_id == ACTIVE_USER.id) {
+            printf("\nAccount ID: %d\n", accounts[i].account_id);
+            printf("Type: %s\n", accounts[i].type);
+            printf("Balance: %.2f\n", accounts[i].balance);
+            printf("Country: %s\n", accounts[i].country);
+            printf("Phone: %s\n", accounts[i].phone);
+            printf("Date: %s\n", accounts[i].date);
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("No accounts found.\n");
+    }
 }
 
 // Update an existing account
