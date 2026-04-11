@@ -122,17 +122,21 @@ void update_account(void) {
 
     Account *a = &accounts[index];
 
-    printf("New country (leave empty to keep): ");
+    printf("Which field do you want to update? (phone/country): ");
     read_line(buf, sizeof(buf));
-    if (strlen(buf) > 0) strcpy(a->country, buf);
 
-    printf("New phone (leave empty to keep): ");
-    read_line(buf, sizeof(buf));
-    if (strlen(buf) > 0) strcpy(a->phone, buf);
-
-    printf("New account type (leave empty to keep): ");
-    read_line(buf, sizeof(buf));
-    if (strlen(buf) > 0) strcpy(a->type, buf);
+    if (strcmp(buf, "phone") == 0) {
+        printf("Enter new phone number: ");
+        read_line(a->phone, PHONE_LEN);
+    }
+    else if (strcmp(buf, "country") == 0) {
+        printf("Enter new country: ");
+        read_line(a->country, COUNTRY_LEN);
+    }
+    else {
+        printf("Invalid field.\n");
+        return;
+    }
 
     if (!rewrite_accounts(accounts, count)) {
         printf("Error saving changes.\n");
