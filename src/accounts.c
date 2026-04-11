@@ -8,7 +8,54 @@
 
 // Create a new account
 void create_account(void) {
-    printf("Create account (not implemented yet).\n");
+    if (!IS_LOGGED_IN) {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    Account accounts[MAX_ACCOUNTS];
+    int count = load_accounts(accounts, MAX_ACCOUNTS);
+
+    Account a;
+    a.id = (count > 0) ? accounts[count - 1].id + 1 : 1;
+    a.user_id = ACTIVE_USER.id;
+    strcpy(a.username, ACTIVE_USER.name);
+
+    char buf[64];
+
+    printf("Enter account number: ");
+    read_line(buf, sizeof(buf));
+    if (!is_number(buf)) {
+        printf("Invalid account number.\n");
+        return;
+    }
+    a.account_id = atoi(buf);
+
+    printf("Enter creation date (dd/mm/yyyy): ");
+    read_line(a.date, DATE_LEN);
+
+    printf("Enter country: ");
+    read_line(a.country, COUNTRY_LEN);
+
+    printf("Enter phone: ");
+    read_line(a.phone, PHONE_LEN);
+
+    printf("Enter initial balance: ");
+    read_line(buf, sizeof(buf));
+    if (sscanf(buf, "%lf", &a.balance) != 1) {
+        printf("Invalid balance.\n");
+        return;
+    }
+
+    printf("Enter account type: ");
+    read_line(a.type, TYPE_LEN);
+
+    if (!append_account(&a)) {
+        printf("Error saving account.\n");
+        return;
+    }
+
+    printf("Account created successfully.\n");
 }
 
 // List accounts for active user
