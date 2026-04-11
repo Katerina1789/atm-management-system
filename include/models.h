@@ -38,4 +38,3 @@ extern User ACTIVE_USER;
 extern int IS_LOGGED_IN;
 
 #endif
-///Add models.h defining User and Account structs and global session variables
