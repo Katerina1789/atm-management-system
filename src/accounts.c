@@ -254,7 +254,48 @@ void do_transaction(void) {
 
 // Delete an account
 void delete_account(void) {
-    printf("Delete account (not implemented yet).\n");
+    if (!IS_LOGGED_IN) {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    Account accounts[MAX_ACCOUNTS];
+    int count = load_accounts(accounts, MAX_ACCOUNTS);
+
+    char buf[64];
+    printf("Enter account number to delete: ");
+    read_line(buf, sizeof(buf));
+    if (!is_number(buf)) {
+        printf("Invalid account number.\n");
+        return;
+    }
+    int target = atoi(buf);
+
+    int index = -1;
+    for (int i = 0; i < count; i++) {
+        if (accounts[i].account_id == target &&
+            accounts[i].user_id == ACTIVE_USER.id) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf("Account not found.\n");
+        return;
+    }
+
+    for (int i = index; i < count - 1; i++) {
+        accounts[i] = accounts[i + 1];
+    }
+    count--;
+
+    if (!rewrite_accounts(accounts, count)) {
+        printf("Error deleting account.\n");
+        return;
+    }
+
+    printf("Account deleted successfully.\n");
 }
 
 // Transfer ownership
