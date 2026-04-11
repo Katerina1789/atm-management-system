@@ -300,5 +300,64 @@ void delete_account(void) {
 
 // Transfer ownership
 void transfer_ownership(void) {
-    printf("Transfer ownership (not implemented yet).\n");
+    if (!IS_LOGGED_IN) {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    Account accounts[MAX_ACCOUNTS];
+    int acc_count = load_accounts(accounts, MAX_ACCOUNTS);
+
+    User users[MAX_USERS];
+    int user_count = load_users(users, MAX_USERS);
+
+    char buf[64];
+
+    printf("Enter account number to transfer: ");
+    read_line(buf, sizeof(buf));
+    if (!is_number(buf)) {
+        printf("Invalid account number.\n");
+        return;
+    }
+    int target_acc = atoi(buf);
+
+    int acc_index = -1;
+    for (int i = 0; i < acc_count; i++) {
+        if (accounts[i].account_id == target_acc &&
+            accounts[i].user_id == ACTIVE_USER.id) {
+            acc_index = i;
+            break;
+        }
+    }
+
+    if (acc_index == -1) {
+        printf("Account not found or not owned by you.\n");
+        return;
+    }
+
+    printf("Enter username of new owner: ");
+    read_line(buf, sizeof(buf));
+
+    int new_owner_index = -1;
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(users[i].name, buf) == 0) {
+            new_owner_index = i;
+            break;
+        }
+    }
+
+    if (new_owner_index == -1) {
+        printf("Target user does not exist.\n");
+        return;
+    }
+
+    accounts[acc_index].user_id = users[new_owner_index].id;
+    strcpy(accounts[acc_index].username, users[new_owner_index].name);
+
+    if (!rewrite_accounts(accounts, acc_count)) {
+        printf("Error saving ownership transfer.\n");
+        return;
+    }
+
+    printf("Ownership transferred successfully.\n");
 }
