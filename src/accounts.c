@@ -258,6 +258,13 @@ void do_transaction(void) {
 
     Account *a = &accounts[index];
 
+    if (strcmp(a->type, "fixed01") == 0 ||
+        strcmp(a->type, "fixed02") == 0 ||
+        strcmp(a->type, "fixed03") == 0) {
+        printf("It is not possible to withdraw or deposit for fixed accounts.\n");
+        return;
+    }
+
     printf("Enter amount (+deposit / -withdraw): ");
     read_line(buf, sizeof(buf));
 
