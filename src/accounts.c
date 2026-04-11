@@ -144,7 +144,53 @@ void update_account(void) {
 
 // Show account details with interest
 void show_account_details(void) {
-    printf("Account details (not implemented yet).\n");
+    if (!IS_LOGGED_IN) {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    Account accounts[MAX_ACCOUNTS];
+    int count = load_accounts(accounts, MAX_ACCOUNTS);
+
+    char buf[64];
+    printf("Enter account number: ");
+    read_line(buf, sizeof(buf));
+    if (!is_number(buf)) {
+        printf("Invalid account number.\n");
+        return;
+    }
+    int target = atoi(buf);
+
+    int index = -1;
+    for (int i = 0; i < count; i++) {
+        if (accounts[i].account_id == target &&
+            accounts[i].user_id == ACTIVE_USER.id) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf("Account not found.\n");
+        return;
+    }
+
+    Account *a = &accounts[index];
+
+    double rate = 0.0;
+    if (strcmp(a->type, "saving") == 0) rate = 0.05;
+    if (strcmp(a->type, "current") == 0) rate = 0.02;
+    if (strcmp(a->type, "fixed") == 0) rate = 0.07;
+
+    double interest = a->balance * rate;
+
+    printf("\nAccount ID: %d\n", a->account_id);
+    printf("Type: %s\n", a->type);
+    printf("Balance: %.2f\n", a->balance);
+    printf("Interest: %.2f\n", interest);
+    printf("Country: %s\n", a->country);
+    printf("Phone: %s\n", a->phone);
+    printf("Date: %s\n", a->date);
 }
 
 // Deposit / withdraw
