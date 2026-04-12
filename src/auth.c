@@ -9,7 +9,7 @@
 User ACTIVE_USER;
 int IS_LOGGED_IN = 0;
 
-// Find user by username (SQLite)
+// Find user by username
 int find_user_by_name(const char *name, User *out)
 {
     return db_find_user_by_name(name, out);
@@ -20,7 +20,7 @@ int register_user(void)
 {
     char name[NAME_LEN];
     char pass[PASS_LEN];
-    char hash[PASS_LEN];
+    char hash[HASH_LEN];
 
     printf("Enter username: ");
     read_line(name, NAME_LEN);
@@ -44,7 +44,8 @@ int register_user(void)
     u.id = (count > 0) ? users[count - 1].id + 1 : 1;
 
     strcpy(u.name, name);
-    strcpy(u.password, hash);
+    strcpy(u.password, pass);
+    strcpy(u.password_hash, hash);
 
     if (!db_insert_user(&u))
     {
@@ -61,7 +62,7 @@ int login_user(void)
 {
     char name[NAME_LEN];
     char pass[PASS_LEN];
-    char hash[PASS_LEN];
+    char hash[HASH_LEN];
 
     printf("Username: ");
     read_line(name, NAME_LEN);
@@ -78,7 +79,7 @@ int login_user(void)
 
     hash_password(pass, hash, sizeof(hash));
 
-    if (strcmp(hash, u.password) != 0)
+    if (strcmp(pass, u.password) != 0 && strcmp(hash, u.password_hash) != 0)
     {
         printf("Incorrect password.\n");
         return 0;
@@ -87,7 +88,7 @@ int login_user(void)
     ACTIVE_USER = u;
     IS_LOGGED_IN = 1;
 
-    start_notification_listener(ACTIVE_USER.name);
+    init_notifications(ACTIVE_USER.name);
 
     printf("Login successful.\n");
     return 1;

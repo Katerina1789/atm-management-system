@@ -477,11 +477,7 @@ void transfer_ownership(void)
 
     printf("Ownership transferred successfully.\n");
 
-    char msg[256];
-    snprintf(msg, sizeof(msg),
-             "You have received account %d from %s.",
-             accounts[acc_index].account_id,
-             ACTIVE_USER.name);
-
-    send_notification(users[new_owner_index].name, msg);
+    notify_account_transfer(users[new_owner_index].name,
+                            accounts[acc_index].account_id,
+                            ACTIVE_USER.name);
 }

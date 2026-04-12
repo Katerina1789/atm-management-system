@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "tui.h"
 #include "db.h"
+#include "notify.h"
 
 // Display the main menu
 static void menu(void)
@@ -20,6 +21,10 @@ static void menu(void)
     printf("7. Transaction\n");
     printf("8. Delete Account\n");
     printf("9. Transfer Ownership\n");
+    if (IS_LOGGED_IN)
+    {
+        printf(COLOR_YELLOW "10. View Notifications\n" COLOR_RESET);
+    }
     printf("0. Exit\n\n");
     printf("Choice: ");
 }
@@ -32,6 +37,12 @@ int main(void)
 
     while (1)
     {
+        // Check for notifications if logged in
+        if (IS_LOGGED_IN)
+        {
+            check_notifications();
+        }
+
         menu();
         read_line(buf, sizeof(buf));
 
@@ -80,6 +91,19 @@ int main(void)
         case 9:
             transfer_ownership();
             tui_pause();
+            break;
+
+        case 10:
+            if (IS_LOGGED_IN)
+            {
+                view_all_notifications();
+                tui_pause();
+            }
+            else
+            {
+                printf(COLOR_RED "Invalid choice.\n" COLOR_RESET);
+                tui_pause();
+            }
             break;
 
         case 0:

@@ -8,6 +8,7 @@
 // Maximum lengths for string fields (user input limits)
 #define NAME_LEN 32
 #define PASS_LEN 64
+#define HASH_LEN 64
 #define DATE_LEN 16
 #define COUNTRY_LEN 32
 #define PHONE_LEN 16
@@ -19,6 +20,7 @@ typedef struct
     int id;
     char name[NAME_LEN];
     char password[PASS_LEN];
+    char password_hash[HASH_LEN];
 } User;
 
 // Represents a bank account belonging to a user

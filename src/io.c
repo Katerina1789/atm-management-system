@@ -16,6 +16,7 @@ int load_users(User *users, int max)
                   users[count].name,
                   users[count].password) == 3)
     {
+        users[count].password_hash[0] = '\0';
         count++;
     }
 

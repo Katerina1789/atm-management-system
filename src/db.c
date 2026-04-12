@@ -32,7 +32,8 @@ int db_init(void)
         "CREATE TABLE IF NOT EXISTS users ("
         "id INTEGER PRIMARY KEY,"
         "name TEXT UNIQUE,"
-        "password TEXT"
+        "password TEXT,"
+        "password_hash TEXT"
         ");";
 
     const char *accounts_sql =
@@ -48,13 +49,22 @@ int db_init(void)
         "type TEXT"
         ");";
 
+    const char *notifications_sql =
+        "CREATE TABLE IF NOT EXISTS notifications ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "username TEXT,"
+        "message TEXT,"
+        "timestamp INTEGER,"
+        "read INTEGER DEFAULT 0"
+        ");";
+
     sqlite3_exec(db, users_sql, 0, 0, 0);
     sqlite3_exec(db, accounts_sql, 0, 0, 0);
+    sqlite3_exec(db, notifications_sql, 0, 0, 0);
 
     sqlite3_close(db);
     return 1;
 }
-
 
 // Insert user
 int db_insert_user(const User *u)
@@ -64,7 +74,7 @@ int db_insert_user(const User *u)
         return 0;
 
     const char *sql =
-        "INSERT INTO users (id, name, password) VALUES (?, ?, ?);";
+        "INSERT INTO users (id, name, password, password_hash) VALUES (?, ?, ?, ?);";
 
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
@@ -76,6 +86,7 @@ int db_insert_user(const User *u)
     sqlite3_bind_int(stmt, 1, u->id);
     sqlite3_bind_text(stmt, 2, u->name, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, u->password, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, u->password_hash, -1, SQLITE_STATIC);
 
     int ok = (sqlite3_step(stmt) == SQLITE_DONE);
 
@@ -91,7 +102,7 @@ int db_load_users(User *users, int max)
     if (!open_db(&db))
         return 0;
 
-    const char *sql = "SELECT id, name, password FROM users ORDER BY id;";
+    const char *sql = "SELECT id, name, password, password_hash FROM users ORDER BY id;";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
     {
@@ -105,6 +116,11 @@ int db_load_users(User *users, int max)
         users[count].id = sqlite3_column_int(stmt, 0);
         strcpy(users[count].name, (const char *)sqlite3_column_text(stmt, 1));
         strcpy(users[count].password, (const char *)sqlite3_column_text(stmt, 2));
+        const char *hash = (const char *)sqlite3_column_text(stmt, 3);
+        if (hash)
+            strcpy(users[count].password_hash, hash);
+        else
+            users[count].password_hash[0] = '\0';
         count++;
     }
 
@@ -121,7 +137,7 @@ int db_find_user_by_name(const char *name, User *out)
         return 0;
 
     const char *sql =
-        "SELECT id, name, password FROM users WHERE name = ? LIMIT 1;";
+        "SELECT id, name, password, password_hash FROM users WHERE name = ? LIMIT 1;";
 
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
@@ -139,6 +155,11 @@ int db_find_user_by_name(const char *name, User *out)
         out->id = sqlite3_column_int(stmt, 0);
         strcpy(out->name, (const char *)sqlite3_column_text(stmt, 1));
         strcpy(out->password, (const char *)sqlite3_column_text(stmt, 2));
+        const char *hash = (const char *)sqlite3_column_text(stmt, 3);
+        if (hash)
+            strcpy(out->password_hash, hash);
+        else
+            out->password_hash[0] = '\0';
         found = 1;
     }
 

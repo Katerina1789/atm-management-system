@@ -1,65 +1,192 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+#include <time.h>
+#include <sqlite3.h>
 #include "notify.h"
+#include "db.h"
+#include "models.h"
+#include "tui.h"
 
-// Build FIFO path for a given user
-static void make_fifo_path(char *buf, size_t size, const char *username)
+static char CURRENT_USER[NAME_LEN] = "";
+static time_t LAST_CHECK = 0;
+
+// Initialize notification system for a user
+void init_notifications(const char *username)
 {
-    snprintf(buf, size, "./data/notify_%s.fifo", username);
+    strncpy(CURRENT_USER, username, NAME_LEN - 1);
+    CURRENT_USER[NAME_LEN - 1] = '\0';
+    LAST_CHECK = time(NULL);
 }
 
-// Start background listener that prints notifications
-void start_notification_listener(const char *username)
+// Check for pending notifications and display them
+void check_notifications(void)
 {
-    char path[256];
-    make_fifo_path(path, sizeof(path), username);
+    if (CURRENT_USER[0] == '\0')
+        return;
 
-    mkfifo(path, 0666);
+    sqlite3 *db;
+    if (sqlite3_open("data/atm.db", &db) != SQLITE_OK)
+        return;
 
-    pid_t pid = fork();
-    if (pid != 0)
+    const char *sql =
+        "SELECT id, message, timestamp FROM notifications "
+        "WHERE username = ? AND read = 0 ORDER BY timestamp;";
+
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
     {
+        sqlite3_close(db);
         return;
     }
 
-    // child: block and print messages
-    while (1)
+    sqlite3_bind_text(stmt, 1, CURRENT_USER, -1, SQLITE_STATIC);
+
+    int has_notifications = 0;
+    while (sqlite3_step(stmt) == SQLITE_ROW)
     {
-        int fd = open(path, O_RDONLY);
-        if (fd < 0)
+        if (!has_notifications)
         {
-            exit(1);
+            printf("\n" COLOR_YELLOW "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" COLOR_RESET "\n");
+            printf(COLOR_YELLOW "📬 NEW NOTIFICATIONS" COLOR_RESET "\n");
+            printf(COLOR_YELLOW "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" COLOR_RESET "\n");
+            has_notifications = 1;
         }
 
-        char buf[256];
-        ssize_t n = read(fd, buf, sizeof(buf) - 1);
-        if (n > 0)
-        {
-            buf[n] = '\0';
-            printf("\n[Notification] %s\n", buf);
-            fflush(stdout);
-        }
+        int notif_id = sqlite3_column_int(stmt, 0);
+        const char *message = (const char *)sqlite3_column_text(stmt, 1);
+        printf(COLOR_GREEN "• %s" COLOR_RESET "\n", message);
 
-        close(fd);
+        // Mark as read
+        char update_sql[256];
+        snprintf(update_sql, sizeof(update_sql),
+                 "UPDATE notifications SET read = 1 WHERE id = %d;", notif_id);
+        sqlite3_exec(db, update_sql, 0, 0, 0);
     }
+
+    if (has_notifications)
+    {
+        printf(COLOR_YELLOW "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" COLOR_RESET "\n\n");
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
 }
 
-// Send a notification message to another user's FIFO
-void send_notification(const char *username, const char *message)
+// View all notifications (read and unread) - user-initiated
+void view_all_notifications(void)
 {
-    char path[256];
-    make_fifo_path(path, sizeof(path), username);
-
-    int fd = open(path, O_WRONLY | O_NONBLOCK);
-    if (fd < 0)
+    if (CURRENT_USER[0] == '\0')
     {
-        return; // user not listening
+        printf("You must be logged in.\n");
+        return;
     }
 
-    write(fd, message, strlen(message));
-    close(fd);
+    sqlite3 *db;
+    if (sqlite3_open("data/atm.db", &db) != SQLITE_OK)
+    {
+        printf("Error accessing notifications.\n");
+        return;
+    }
+
+    // Get all notifications (read and unread) from last 30 days
+    const char *sql =
+        "SELECT id, message, timestamp, read FROM notifications "
+        "WHERE username = ? AND timestamp > ? "
+        "ORDER BY timestamp DESC;";
+
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
+    {
+        sqlite3_close(db);
+        printf("Error loading notifications.\n");
+        return;
+    }
+
+    int thirty_days_ago = (int)time(NULL) - (30 * 24 * 60 * 60);
+
+    sqlite3_bind_text(stmt, 1, CURRENT_USER, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, thirty_days_ago);
+
+    int count = 0;
+    printf("\n" COLOR_CYAN "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" COLOR_RESET "\n");
+    printf(COLOR_CYAN "📬 NOTIFICATION CENTER" COLOR_RESET "\n");
+    printf(COLOR_CYAN "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" COLOR_RESET "\n\n");
+
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        int notif_id = sqlite3_column_int(stmt, 0);
+        const char *message = (const char *)sqlite3_column_text(stmt, 1);
+        int timestamp = sqlite3_column_int(stmt, 2);
+        int is_read = sqlite3_column_int(stmt, 3);
+
+        // Format timestamp
+        time_t t = (time_t)timestamp;
+        struct tm *tm_info = localtime(&t);
+        char time_str[64];
+        strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M", tm_info);
+
+        // Display with status indicator
+        if (is_read)
+        {
+            printf(COLOR_RESET "  ✓ %s" COLOR_RESET " (%s)\n", message, time_str);
+        }
+        else
+        {
+            printf(COLOR_GREEN "  ● %s" COLOR_RESET " (%s) " COLOR_YELLOW "[NEW]" COLOR_RESET "\n", message, time_str);
+            // Mark as read
+            char update_sql[256];
+            snprintf(update_sql, sizeof(update_sql),
+                     "UPDATE notifications SET read = 1 WHERE id = %d;", notif_id);
+            sqlite3_exec(db, update_sql, 0, 0, 0);
+        }
+        count++;
+    }
+
+    if (count == 0)
+    {
+        printf(COLOR_YELLOW "  No notifications in the last 30 days.\n" COLOR_RESET);
+    }
+    else
+    {
+        printf("\n" COLOR_CYAN "  Total: %d notification(s)" COLOR_RESET "\n", count);
+    }
+
+    printf(COLOR_CYAN "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" COLOR_RESET "\n");
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
+
+// Send notification about account transfer
+void notify_account_transfer(const char *to_user, int account_id, const char *from_user)
+{
+    sqlite3 *db;
+    if (sqlite3_open("data/atm.db", &db) != SQLITE_OK)
+        return;
+
+    const char *sql =
+        "INSERT INTO notifications (username, message, timestamp, read) "
+        "VALUES (?, ?, ?, 0);";
+
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
+    {
+        sqlite3_close(db);
+        return;
+    }
+
+    char message[256];
+    snprintf(message, sizeof(message),
+             "You received account #%d from %s.", account_id, from_user);
+
+    long long timestamp = (long long)time(NULL);
+
+    sqlite3_bind_text(stmt, 1, to_user, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, message, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 3, (int)timestamp);
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
 }

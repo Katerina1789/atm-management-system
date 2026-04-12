@@ -18,5 +18,11 @@ void tui_header(const char *title)
 void tui_pause(void)
 {
     printf("\n" COLOR_YELLOW "Press Enter to continue..." COLOR_RESET);
-    getchar();
+
+    int c = getchar();
+    if (c != '\n' && c != EOF)
+    {
+        while ((c = getchar()) != '\n' && c != EOF)
+            ;
+    }
 }

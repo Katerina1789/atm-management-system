@@ -1,10 +1,16 @@
 #ifndef NOTIFY_H
 #define NOTIFY_H
 
-// Start background listener for incoming notifications
-void start_notification_listener(const char *username);
+// Initialize notification system for a user
+void init_notifications(const char *username);
 
-// Send a notification message to a specific user
-void send_notification(const char *username, const char *message);
+// Check for pending notifications and display them (auto-display unread)
+void check_notifications(void);
+
+// View all notifications (read and unread) - user-initiated
+void view_all_notifications(void);
+
+// Send notification about account transfer
+void notify_account_transfer(const char *to_user, int account_id, const char *from_user);
 
 #endif
