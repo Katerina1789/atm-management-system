@@ -14,23 +14,25 @@
 #define TYPE_LEN 16
 
 // Represents a registered user
-typedef struct {
+typedef struct
+{
     int id;
     char name[NAME_LEN];
     char password[PASS_LEN];
 } User;
 
 // Represents a bank account belonging to a user
-typedef struct {
-    int id;   
-    int user_id;    
-    char username[NAME_LEN]; 
-    int account_id;             
+typedef struct
+{
+    int id;
+    int user_id;
+    char username[NAME_LEN];
+    int account_id;
     char date[DATE_LEN];
     char country[COUNTRY_LEN];
     char phone[PHONE_LEN];
     double balance;
-    char type[TYPE_LEN];  
+    char type[TYPE_LEN];
 } Account;
 
 // Global session state (defined in auth.c)

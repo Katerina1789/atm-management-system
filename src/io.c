@@ -3,16 +3,19 @@
 #include "io.h"
 
 // Load users from users.txt
-int load_users(User *users, int max) {
+int load_users(User *users, int max)
+{
     FILE *f = fopen("data/users.txt", "r");
-    if (!f) return 0;
+    if (!f)
+        return 0;
 
     int count = 0;
     while (count < max &&
            fscanf(f, "%d %31s %63s",
                   &users[count].id,
                   users[count].name,
-                  users[count].password) == 3) {
+                  users[count].password) == 3)
+    {
         count++;
     }
 
@@ -21,9 +24,11 @@ int load_users(User *users, int max) {
 }
 
 // Append a user to users.txt
-int append_user(const User *u) {
+int append_user(const User *u)
+{
     FILE *f = fopen("data/users.txt", "a");
-    if (!f) return 0;
+    if (!f)
+        return 0;
 
     fprintf(f, "%d %s %s\n", u->id, u->name, u->password);
     fclose(f);
@@ -31,9 +36,11 @@ int append_user(const User *u) {
 }
 
 // Load accounts from records.txt
-int load_accounts(Account *accounts, int max) {
+int load_accounts(Account *accounts, int max)
+{
     FILE *f = fopen("data/records.txt", "r");
-    if (!f) return 0;
+    if (!f)
+        return 0;
 
     int count = 0;
     while (count < max &&
@@ -46,7 +53,8 @@ int load_accounts(Account *accounts, int max) {
                   accounts[count].country,
                   accounts[count].phone,
                   &accounts[count].balance,
-                  accounts[count].type) == 9) {
+                  accounts[count].type) == 9)
+    {
         count++;
     }
 
@@ -55,11 +63,14 @@ int load_accounts(Account *accounts, int max) {
 }
 
 // Rewrite accounts safely using a temp file
-int rewrite_accounts(Account *accounts, int count) {
+int rewrite_accounts(Account *accounts, int count)
+{
     FILE *f = fopen("data/records.tmp", "w");
-    if (!f) return 0;
+    if (!f)
+        return 0;
 
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++)
+    {
         fprintf(f, "%d %d %s %d %s %s %s %.2f %s\n",
                 accounts[i].id,
                 accounts[i].user_id,
@@ -81,9 +92,11 @@ int rewrite_accounts(Account *accounts, int count) {
 }
 
 // Append a new account to records.txt
-int append_account(const Account *a) {
+int append_account(const Account *a)
+{
     FILE *f = fopen("data/records.txt", "a");
-    if (!f) return 0;
+    if (!f)
+        return 0;
 
     fprintf(f, "%d %d %s %d %s %s %s %.2f %s\n",
             a->id,
