@@ -61,10 +61,10 @@ A command-line banking application in C demonstrating file I/O, data structures,
 ## Bonus Features
 
 - **Real-time notifications** using pipes/FIFOs
-- **Password encryption** (SHA-256 or similar)
+- **Password encryption** (simple hashing)
 - **Improved TUI** with clear screens and consistent layout
 - **Custom Makefile** with build, clean, debug targets
-- **SQLite integration** replacing text files
+- **SQLite integration** replacing txt files
 
 ## Technical Requirements
 
@@ -171,6 +171,7 @@ Produce clean, professional docs:
 - `PRD.md`
 - `architecture.md`
 - `project_structure.md`
+- `storage_implementation.md`
 - `audit_guide.md`
 
 Documentation style:
