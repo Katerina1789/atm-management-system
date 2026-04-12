@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "io.h"
 #include "notify.h"
+#include "crypto.h"
 
 User ACTIVE_USER;
 int IS_LOGGED_IN = 0;
@@ -31,6 +32,7 @@ int register_user(void)
 {
     char name[NAME_LEN];
     char pass[PASS_LEN];
+    char hash[PASS_LEN];
 
     printf("Enter username: ");
     read_line(name, NAME_LEN);
@@ -45,6 +47,8 @@ int register_user(void)
     printf("Enter password: ");
     read_line(pass, PASS_LEN);
 
+    hash_password(pass, hash, sizeof(hash));
+
     User u;
     u.id = 1;
 
@@ -56,7 +60,7 @@ int register_user(void)
     }
 
     strcpy(u.name, name);
-    strcpy(u.password, pass);
+    strcpy(u.password, hash);
 
     if (!append_user(&u))
     {
@@ -73,6 +77,7 @@ int login_user(void)
 {
     char name[NAME_LEN];
     char pass[PASS_LEN];
+    char hash[PASS_LEN];
 
     printf("Username: ");
     read_line(name, NAME_LEN);
@@ -87,7 +92,9 @@ int login_user(void)
     printf("Password: ");
     read_line(pass, PASS_LEN);
 
-    if (strcmp(pass, u.password) != 0)
+    hash_password(pass, hash, sizeof(hash));
+
+    if (strcmp(hash, u.password) != 0)
     {
         printf("Incorrect password.\n");
         return 0;
@@ -95,6 +102,8 @@ int login_user(void)
 
     ACTIVE_USER = u;
     IS_LOGGED_IN = 1;
+
+    start_notification_listener(ACTIVE_USER.name);
 
     printf("Login successful.\n");
     return 1;
