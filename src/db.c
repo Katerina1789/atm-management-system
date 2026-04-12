@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sqlite3.h>
 #include "db.h"
 
@@ -12,9 +14,16 @@ static int open_db(sqlite3 **db)
     return 1;
 }
 
+static void ensure_data_dir(void)
+{
+    mkdir("data", 0755);
+}
+
 // Initialize database and tables
 int db_init(void)
 {
+    ensure_data_dir();
+
     sqlite3 *db;
     if (!open_db(&db))
         return 0;
@@ -23,7 +32,8 @@ int db_init(void)
         "CREATE TABLE IF NOT EXISTS users ("
         "id INTEGER PRIMARY KEY,"
         "name TEXT UNIQUE,"
-        "password TEXT);";
+        "password TEXT"
+        ");";
 
     const char *accounts_sql =
         "CREATE TABLE IF NOT EXISTS accounts ("
@@ -35,7 +45,8 @@ int db_init(void)
         "country TEXT,"
         "phone TEXT,"
         "balance REAL,"
-        "type TEXT);";
+        "type TEXT"
+        ");";
 
     sqlite3_exec(db, users_sql, 0, 0, 0);
     sqlite3_exec(db, accounts_sql, 0, 0, 0);
@@ -43,6 +54,7 @@ int db_init(void)
     sqlite3_close(db);
     return 1;
 }
+
 
 // Insert user
 int db_insert_user(const User *u)
