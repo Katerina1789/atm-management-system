@@ -60,7 +60,7 @@ A command-line banking application in C demonstrating file I/O, data structures,
 
 ## Bonus Features
 
-- **Real-time notifications** using pipes/FIFOs
+- **Real-time notifications** polling system
 - **Password encryption** (simple hashing)
 - **Improved TUI** with clear screens and consistent layout
 - **Custom Makefile** with build, clean, debug targets
@@ -159,7 +159,7 @@ Goal: minimal, readable, predictable C.
 ### 7. Add Bonus Features
 
 Optional enhancements:
-- Real-time notifications via pipes/FIFOs
+- Real-time notifications
 - Password hashing
 - Improved TUI
 - Custom Makefile
