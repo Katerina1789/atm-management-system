@@ -4,9 +4,9 @@
 #include "accounts.h"
 #include "models.h"
 #include "utils.h"
-#include "io.h"
 #include "auth.h"
 #include "notify.h"
+#include "db.h"
 
 // Create a new account
 void create_account(void)
@@ -18,7 +18,7 @@ void create_account(void)
     }
 
     Account accounts[MAX_ACCOUNTS];
-    int count = load_accounts(accounts, MAX_ACCOUNTS);
+    int count = db_load_accounts(accounts, MAX_ACCOUNTS);
 
     Account a;
     a.id = (count > 0) ? accounts[count - 1].id + 1 : 1;
@@ -56,7 +56,7 @@ void create_account(void)
     printf("Enter account type: ");
     read_line(a.type, TYPE_LEN);
 
-    if (!append_account(&a))
+    if (!db_insert_account(&a))
     {
         printf("Error saving account.\n");
         return;
@@ -75,7 +75,7 @@ void list_accounts(void)
     }
 
     Account accounts[MAX_ACCOUNTS];
-    int count = load_accounts(accounts, MAX_ACCOUNTS);
+    int count = db_load_accounts(accounts, MAX_ACCOUNTS);
 
     int found = 0;
 
@@ -109,7 +109,7 @@ void update_account(void)
     }
 
     Account accounts[MAX_ACCOUNTS];
-    int count = load_accounts(accounts, MAX_ACCOUNTS);
+    int count = db_load_accounts(accounts, MAX_ACCOUNTS);
 
     char buf[64];
     printf("Enter account number to update: ");
@@ -159,7 +159,7 @@ void update_account(void)
         return;
     }
 
-    if (!rewrite_accounts(accounts, count))
+    if (!db_update_account(a))
     {
         printf("Error saving changes.\n");
         return;
@@ -178,7 +178,7 @@ void show_account_details(void)
     }
 
     Account accounts[MAX_ACCOUNTS];
-    int count = load_accounts(accounts, MAX_ACCOUNTS);
+    int count = db_load_accounts(accounts, MAX_ACCOUNTS);
 
     char buf[64];
     printf("Enter account number: ");
@@ -270,7 +270,7 @@ void do_transaction(void)
     }
 
     Account accounts[MAX_ACCOUNTS];
-    int count = load_accounts(accounts, MAX_ACCOUNTS);
+    int count = db_load_accounts(accounts, MAX_ACCOUNTS);
 
     char buf[64];
     printf("Enter account number: ");
@@ -347,7 +347,7 @@ void do_transaction(void)
         return;
     }
 
-    if (!rewrite_accounts(accounts, count))
+    if (!db_update_account(a))
     {
         printf("Error saving transaction.\n");
         return;
@@ -366,7 +366,7 @@ void delete_account(void)
     }
 
     Account accounts[MAX_ACCOUNTS];
-    int count = load_accounts(accounts, MAX_ACCOUNTS);
+    int count = db_load_accounts(accounts, MAX_ACCOUNTS);
 
     char buf[64];
     printf("Enter account number to delete: ");
@@ -395,13 +395,7 @@ void delete_account(void)
         return;
     }
 
-    for (int i = index; i < count - 1; i++)
-    {
-        accounts[i] = accounts[i + 1];
-    }
-    count--;
-
-    if (!rewrite_accounts(accounts, count))
+    if (!db_delete_account(accounts[index].id))
     {
         printf("Error deleting account.\n");
         return;
@@ -420,10 +414,10 @@ void transfer_ownership(void)
     }
 
     Account accounts[MAX_ACCOUNTS];
-    int acc_count = load_accounts(accounts, MAX_ACCOUNTS);
+    int acc_count = db_load_accounts(accounts, MAX_ACCOUNTS);
 
     User users[MAX_USERS];
-    int user_count = load_users(users, MAX_USERS);
+    int user_count = db_load_users(users, MAX_USERS);
 
     char buf[64];
 
@@ -475,7 +469,7 @@ void transfer_ownership(void)
     accounts[acc_index].user_id = users[new_owner_index].id;
     strcpy(accounts[acc_index].username, users[new_owner_index].name);
 
-    if (!rewrite_accounts(accounts, acc_count))
+    if (!db_update_account(&accounts[acc_index]))
     {
         printf("Error saving ownership transfer.\n");
         return;
@@ -483,7 +477,6 @@ void transfer_ownership(void)
 
     printf("Ownership transferred successfully.\n");
 
-    // Send notification to new owner
     char msg[256];
     snprintf(msg, sizeof(msg),
              "You have received account %d from %s.",

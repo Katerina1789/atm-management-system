@@ -2,29 +2,17 @@
 #include <string.h>
 #include "auth.h"
 #include "utils.h"
-#include "io.h"
 #include "notify.h"
 #include "crypto.h"
+#include "db.h"
 
 User ACTIVE_USER;
 int IS_LOGGED_IN = 0;
 
-// Find user by username
+// Find user by username (SQLite)
 int find_user_by_name(const char *name, User *out)
 {
-    User users[MAX_USERS];
-    int count = load_users(users, MAX_USERS);
-
-    for (int i = 0; i < count; i++)
-    {
-        if (strcmp(users[i].name, name) == 0)
-        {
-            if (out)
-                *out = users[i];
-            return 1;
-        }
-    }
-    return 0;
+    return db_find_user_by_name(name, out);
 }
 
 // Register a new user
@@ -49,20 +37,16 @@ int register_user(void)
 
     hash_password(pass, hash, sizeof(hash));
 
-    User u;
-    u.id = 1;
-
     User users[MAX_USERS];
-    int count = load_users(users, MAX_USERS);
-    if (count > 0)
-    {
-        u.id = users[count - 1].id + 1;
-    }
+    int count = db_load_users(users, MAX_USERS);
+
+    User u;
+    u.id = (count > 0) ? users[count - 1].id + 1 : 1;
 
     strcpy(u.name, name);
     strcpy(u.password, hash);
 
-    if (!append_user(&u))
+    if (!db_insert_user(&u))
     {
         printf("Error saving user.\n");
         return 0;
