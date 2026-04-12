@@ -195,7 +195,7 @@ void show_account_details(void) {
     double interest = 0.0;
 
     if (strcmp(a->type, "savings") == 0) {
-        interest = a->balance * 0.07;
+        interest = (a->balance * 0.07) / 12.0;
         printf("You will get $%.2f as interest on day %d of every month.\n",
                interest, day);
         return;
@@ -209,14 +209,14 @@ void show_account_details(void) {
     }
 
     if (strcmp(a->type, "fixed02") == 0) {
-        interest = a->balance * 0.05;
+        interest = (a->balance * 0.05) * 2;
         printf("You will get $%.2f as interest on %02d/%02d/%04d.\n",
                interest, day, month, year + 2);
         return;
     }
 
     if (strcmp(a->type, "fixed03") == 0) {
-        interest = a->balance * 0.08;
+        interest = (a->balance * 0.08) * 3;
         printf("You will get $%.2f as interest on %02d/%02d/%04d.\n",
                interest, day, month, year + 3);
         return;
