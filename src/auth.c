@@ -3,18 +3,23 @@
 #include "auth.h"
 #include "utils.h"
 #include "io.h"
+#include "notify.h"
 
 User ACTIVE_USER;
 int IS_LOGGED_IN = 0;
 
 // Find user by username
-int find_user_by_name(const char *name, User *out) {
+int find_user_by_name(const char *name, User *out)
+{
     User users[MAX_USERS];
     int count = load_users(users, MAX_USERS);
 
-    for (int i = 0; i < count; i++) {
-        if (strcmp(users[i].name, name) == 0) {
-            if (out) *out = users[i];
+    for (int i = 0; i < count; i++)
+    {
+        if (strcmp(users[i].name, name) == 0)
+        {
+            if (out)
+                *out = users[i];
             return 1;
         }
     }
@@ -22,7 +27,8 @@ int find_user_by_name(const char *name, User *out) {
 }
 
 // Register a new user
-int register_user(void) {
+int register_user(void)
+{
     char name[NAME_LEN];
     char pass[PASS_LEN];
 
@@ -30,7 +36,8 @@ int register_user(void) {
     read_line(name, NAME_LEN);
 
     User tmp;
-    if (find_user_by_name(name, &tmp)) {
+    if (find_user_by_name(name, &tmp))
+    {
         printf("Username already exists.\n");
         return 0;
     }
@@ -43,14 +50,16 @@ int register_user(void) {
 
     User users[MAX_USERS];
     int count = load_users(users, MAX_USERS);
-    if (count > 0) {
+    if (count > 0)
+    {
         u.id = users[count - 1].id + 1;
     }
 
     strcpy(u.name, name);
     strcpy(u.password, pass);
 
-    if (!append_user(&u)) {
+    if (!append_user(&u))
+    {
         printf("Error saving user.\n");
         return 0;
     }
@@ -60,7 +69,8 @@ int register_user(void) {
 }
 
 // Login user
-int login_user(void) {
+int login_user(void)
+{
     char name[NAME_LEN];
     char pass[PASS_LEN];
 
@@ -68,7 +78,8 @@ int login_user(void) {
     read_line(name, NAME_LEN);
 
     User u;
-    if (!find_user_by_name(name, &u)) {
+    if (!find_user_by_name(name, &u))
+    {
         printf("User not found.\n");
         return 0;
     }
@@ -76,7 +87,8 @@ int login_user(void) {
     printf("Password: ");
     read_line(pass, PASS_LEN);
 
-    if (strcmp(pass, u.password) != 0) {
+    if (strcmp(pass, u.password) != 0)
+    {
         printf("Incorrect password.\n");
         return 0;
     }
