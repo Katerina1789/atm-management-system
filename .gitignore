@@ -2,13 +2,14 @@
 /build/
 /*.o
 *.o
-*.a
-*.so
-*.out
-*.exe
 
 # Final binary
 atm
+build/atm
+
+# Static / shared libs
+*.a
+*.so
 
 # macOS / Windows junk
 .DS_Store
@@ -22,3 +23,9 @@ Thumbs.db
 
 # Debug symbols
 *.dSYM/
+
+# VS Code settings
+.vscode/
+
+# Log files
+*.log
