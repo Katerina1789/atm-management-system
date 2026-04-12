@@ -3,6 +3,7 @@
 #include "auth.h"
 #include "accounts.h"
 #include "io.h"
+#include "utils.h"
 
 // Display the main menu
 static void menu(void) {

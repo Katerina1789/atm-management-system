@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "accounts.h"
 #include "models.h"
 #include "utils.h"
@@ -193,7 +194,7 @@ void show_account_details(void) {
 
     double interest = 0.0;
 
-    if (strcmp(a->type, "saving") == 0 || strcmp(a->type, "savings") == 0) {
+    if (strcmp(a->type, "savings") == 0) {
         interest = a->balance * 0.07;
         printf("You will get $%.2f as interest on day %d of every month.\n",
                interest, day);
@@ -269,21 +270,37 @@ void do_transaction(void) {
         return;
     }
 
-    printf("Enter amount (+deposit / -withdraw): ");
+    printf("Transaction type (deposit/withdraw): ");
     read_line(buf, sizeof(buf));
 
     double amount = 0;
-    if (sscanf(buf, "%lf", &amount) != 1) {
-        printf("Invalid amount.\n");
+
+    if (strcmp(buf, "deposit") == 0) {
+        printf("Enter amount to deposit: ");
+        read_line(buf, sizeof(buf));
+        if (sscanf(buf, "%lf", &amount) != 1 || amount <= 0) {
+            printf("Invalid amount.\n");
+            return;
+        }
+        a->balance += amount;
+    }
+    else if (strcmp(buf, "withdraw") == 0) {
+        printf("Enter amount to withdraw: ");
+        read_line(buf, sizeof(buf));
+        if (sscanf(buf, "%lf", &amount) != 1 || amount <= 0) {
+            printf("Invalid amount.\n");
+            return;
+        }
+        if (a->balance < amount) {
+            printf("Insufficient funds.\n");
+            return;
+        }
+        a->balance -= amount;
+    }
+    else {
+        printf("Invalid transaction type.\n");
         return;
     }
-
-    if (amount < 0 && a->balance + amount < 0) {
-        printf("Insufficient funds.\n");
-        return;
-    }
-
-    a->balance += amount;
 
     if (!rewrite_accounts(accounts, count)) {
         printf("Error saving transaction.\n");
