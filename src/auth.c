@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <sqlite3.h>
 #include "auth.h"
 #include "utils.h"
 #include "notify.h"
@@ -92,4 +93,92 @@ int login_user(void)
 
     printf("Login successful.\n");
     return 1;
+}
+
+// Change password for logged-in user
+void change_password(void)
+{
+    if (!IS_LOGGED_IN)
+    {
+        printf("You must be logged in.\n");
+        return;
+    }
+
+    char old_pass[PASS_LEN];
+    char new_pass[PASS_LEN];
+    char confirm_pass[PASS_LEN];
+    char old_hash[HASH_LEN];
+    char new_hash[HASH_LEN];
+
+    printf("Enter current password: ");
+    read_line(old_pass, PASS_LEN);
+
+    // Verify current password
+    hash_password(old_pass, old_hash, sizeof(old_hash));
+    if (strcmp(old_pass, ACTIVE_USER.password) != 0 && 
+        strcmp(old_hash, ACTIVE_USER.password_hash) != 0)
+    {
+        printf("Incorrect current password.\n");
+        return;
+    }
+
+    printf("Enter new password: ");
+    read_line(new_pass, PASS_LEN);
+
+    if (strlen(new_pass) < 4)
+    {
+        printf("Password must be at least 4 characters.\n");
+        return;
+    }
+
+    printf("Confirm new password: ");
+    read_line(confirm_pass, PASS_LEN);
+
+    if (strcmp(new_pass, confirm_pass) != 0)
+    {
+        printf("Passwords do not match.\n");
+        return;
+    }
+
+    // Hash new password
+    hash_password(new_pass, new_hash, sizeof(new_hash));
+
+    // Update in database
+    sqlite3 *db;
+    if (sqlite3_open("data/atm.db", &db) != SQLITE_OK)
+    {
+        printf("Error updating password.\n");
+        return;
+    }
+
+    const char *sql = "UPDATE users SET password = ?, password_hash = ? WHERE id = ?;";
+    sqlite3_stmt *stmt;
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
+    {
+        sqlite3_close(db);
+        printf("Error updating password.\n");
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, new_pass, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, new_hash, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 3, ACTIVE_USER.id);
+
+    if (sqlite3_step(stmt) == SQLITE_DONE)
+    {
+        // Update active user session
+        strcpy(ACTIVE_USER.password, new_pass);
+        strcpy(ACTIVE_USER.password_hash, new_hash);
+        
+        printf("Password changed successfully.\n");
+        notify_password_change(ACTIVE_USER.name);
+    }
+    else
+    {
+        printf("Error updating password.\n");
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
 }
