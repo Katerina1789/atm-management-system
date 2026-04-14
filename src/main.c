@@ -24,6 +24,7 @@ static void menu(void)
     if (IS_LOGGED_IN)
     {
         printf(COLOR_YELLOW "10. View Notifications\n" COLOR_RESET);
+        printf(COLOR_YELLOW "11. Change Password\n" COLOR_RESET);
     }
     printf("0. Exit\n\n");
     printf("Choice: ");
@@ -97,6 +98,19 @@ int main(void)
             if (IS_LOGGED_IN)
             {
                 view_all_notifications();
+                tui_pause();
+            }
+            else
+            {
+                printf(COLOR_RED "Invalid choice.\n" COLOR_RESET);
+                tui_pause();
+            }
+            break;
+
+        case 11:
+            if (IS_LOGGED_IN)
+            {
+                change_password();
                 tui_pause();
             }
             else

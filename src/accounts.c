@@ -147,11 +147,13 @@ void update_account(void)
     {
         printf("Enter new phone number: ");
         read_line(a->phone, PHONE_LEN);
+        notify_profile_update(ACTIVE_USER.name, a->account_id, "phone number");
     }
     else if (strcmp(buf, "country") == 0)
     {
         printf("Enter new country: ");
         read_line(a->country, COUNTRY_LEN);
+        notify_profile_update(ACTIVE_USER.name, a->account_id, "country");
     }
     else
     {
@@ -324,6 +326,9 @@ void do_transaction(void)
             return;
         }
         a->balance += amount;
+        
+        // Notify about deposit
+        notify_incoming_transaction(ACTIVE_USER.name, a->account_id, amount, "deposit");
     }
     else if (strcmp(buf, "withdraw") == 0)
     {
@@ -340,6 +345,11 @@ void do_transaction(void)
             return;
         }
         a->balance -= amount;
+        
+        if (a->balance < 100.0)
+        {
+            notify_low_balance(ACTIVE_USER.name, a->account_id, a->balance);
+        }
     }
     else
     {
