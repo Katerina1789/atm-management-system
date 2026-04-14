@@ -190,3 +190,81 @@ void notify_account_transfer(const char *to_user, int account_id, const char *fr
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
+
+// Helper function to create notification
+static void create_notification(const char *username, const char *message)
+{
+    sqlite3 *db;
+    if (sqlite3_open("data/atm.db", &db) != SQLITE_OK)
+        return;
+
+    const char *sql =
+        "INSERT INTO notifications (username, message, timestamp, read) "
+        "VALUES (?, ?, ?, 0);";
+
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK)
+    {
+        sqlite3_close(db);
+        return;
+    }
+
+    long long timestamp = (long long)time(NULL);
+
+    sqlite3_bind_text(stmt, 1, username, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, message, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 3, (int)timestamp);
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
+
+// Notify about incoming transaction (deposit from another user)
+void notify_incoming_transaction(const char *to_user, int account_id, double amount, const char *type)
+{
+    char message[256];
+    snprintf(message, sizeof(message),
+             "Your account #%d received a %s of $%.2f.",
+             account_id, type, amount);
+    create_notification(to_user, message);
+}
+
+// Notify about low balance
+void notify_low_balance(const char *username, int account_id, double balance)
+{
+    char message[256];
+    snprintf(message, sizeof(message),
+             "Warning: Account #%d balance is low ($%.2f).",
+             account_id, balance);
+    create_notification(username, message);
+}
+
+// Notify about interest applied
+void notify_interest_applied(const char *username, int account_id, double interest)
+{
+    char message[256];
+    snprintf(message, sizeof(message),
+             "Interest of $%.2f has been applied to account #%d.",
+             interest, account_id);
+    create_notification(username, message);
+}
+
+// Notify about profile update
+void notify_profile_update(const char *username, int account_id, const char *field)
+{
+    char message[256];
+    snprintf(message, sizeof(message),
+             "Account #%d %s has been updated.",
+             account_id, field);
+    create_notification(username, message);
+}
+
+// Notify about password change
+void notify_password_change(const char *username)
+{
+    char message[256];
+    snprintf(message, sizeof(message),
+             "Your password has been changed successfully.");
+    create_notification(username, message);
+}
