@@ -171,7 +171,7 @@ Produce clean, professional docs:
 - `PRD.md`
 - `architecture.md`
 - `project_structure.md`
-- `storage_implementation.md`
+- `storage_implementation.md` (later along with more account types implementation)
 - `audit_guide.md`
 
 Documentation style:
