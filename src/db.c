@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sqlite3.h>
 #include "db.h"
+#include "crypto.h"
 
 static const char *DB_PATH = "data/atm.db";
 
@@ -61,6 +62,39 @@ int db_init(void)
     sqlite3_exec(db, users_sql, 0, 0, 0);
     sqlite3_exec(db, accounts_sql, 0, 0, 0);
     sqlite3_exec(db, notifications_sql, 0, 0, 0);
+
+    // Check if Alice already exists
+    const char *check_sql = "SELECT COUNT(*) FROM users WHERE name = 'Alice';";
+    sqlite3_stmt *check_stmt;
+    int alice_exists = 0;
+
+    if (sqlite3_prepare_v2(db, check_sql, -1, &check_stmt, 0) == SQLITE_OK)
+    {
+        if (sqlite3_step(check_stmt) == SQLITE_ROW)
+        {
+            alice_exists = sqlite3_column_int(check_stmt, 0) > 0;
+        }
+        sqlite3_finalize(check_stmt);
+    }
+
+    // Create Alice if she doesn't exist
+    if (!alice_exists)
+    {
+        // Hash the password
+        char hash[64];
+        hash_password("1234password", hash, sizeof(hash));
+
+        const char *insert_sql =
+            "INSERT INTO users (id, name, password, password_hash) VALUES (0, 'Alice', '1234password', ?);";
+
+        sqlite3_stmt *insert_stmt;
+        if (sqlite3_prepare_v2(db, insert_sql, -1, &insert_stmt, 0) == SQLITE_OK)
+        {
+            sqlite3_bind_text(insert_stmt, 1, hash, -1, SQLITE_STATIC);
+            sqlite3_step(insert_stmt);
+            sqlite3_finalize(insert_stmt);
+        }
+    }
 
     sqlite3_close(db);
     return 1;
