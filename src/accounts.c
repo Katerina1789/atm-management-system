@@ -31,19 +31,34 @@ void create_account(void)
     read_line(buf, sizeof(buf));
     if (!is_number(buf))
     {
-        printf("Invalid account number.\n");
+        printf("Invalid account number!\n");
         return;
     }
     a.account_id = atoi(buf);
 
     printf("Enter creation date (dd/mm/yyyy): ");
     read_line(a.date, DATE_LEN);
+    if (!is_valid_date(a.date))
+    {
+        printf("Invalid date format! Must be DD/MM/YYYY with valid day, month, and year.\n");
+        return;
+    }
 
     printf("Enter country: ");
     read_line(a.country, COUNTRY_LEN);
+    if (!is_valid_country(a.country))
+    {
+        printf("Invalid country name! Please use a valid country name (e.g., Neverland, Narnia, Gondor).\n");
+        return;
+    }
 
     printf("Enter phone: ");
     read_line(a.phone, PHONE_LEN);
+    if (!is_valid_phone(a.phone))
+    {
+        printf("Invalid phone number! Must be exactly 10 digits.\n");
+        return;
+    }
 
     printf("Enter initial balance: ");
     read_line(buf, sizeof(buf));
@@ -55,14 +70,19 @@ void create_account(void)
 
     printf("Enter account type: ");
     read_line(a.type, TYPE_LEN);
-
-    if (!db_insert_account(&a))
+    if (!is_valid_account_type(a.type))
     {
-        printf("Error saving account.\n");
+        printf("Invalid account type! Must be: savings, current, fixed01, fixed02, or fixed03.\n");
         return;
     }
 
-    printf("Account created successfully.\n");
+    if (!db_insert_account(&a))
+    {
+        printf("Error saving account...\n");
+        return;
+    }
+
+    printf("Account created successfully!\n");
 }
 
 // List accounts for active user
@@ -146,13 +166,27 @@ void update_account(void)
     if (strcmp(buf, "phone") == 0)
     {
         printf("Enter new phone number: ");
-        read_line(a->phone, PHONE_LEN);
+        char temp_phone[PHONE_LEN];
+        read_line(temp_phone, PHONE_LEN);
+        if (!is_valid_phone(temp_phone))
+        {
+            printf("Invalid phone number! Must be exactly 10 digits.\n");
+            return;
+        }
+        strcpy(a->phone, temp_phone);
         notify_profile_update(ACTIVE_USER.name, a->account_id, "phone number");
     }
     else if (strcmp(buf, "country") == 0)
     {
         printf("Enter new country: ");
-        read_line(a->country, COUNTRY_LEN);
+        char temp_country[COUNTRY_LEN];
+        read_line(temp_country, COUNTRY_LEN);
+        if (!is_valid_country(temp_country))
+        {
+            printf("Invalid country name! Please use a valid country name (e.g., Neverland, Narnia, Gondor).\n");
+            return;
+        }
+        strcpy(a->country, temp_country);
         notify_profile_update(ACTIVE_USER.name, a->account_id, "country");
     }
     else
@@ -163,11 +197,11 @@ void update_account(void)
 
     if (!db_update_account(a))
     {
-        printf("Error saving changes.\n");
+        printf("Error saving changes...\n");
         return;
     }
 
-    printf("Account updated successfully.\n");
+    printf("Account updated successfully!\n");
 }
 
 // Show account details and interest information
@@ -326,7 +360,7 @@ void do_transaction(void)
             return;
         }
         a->balance += amount;
-        
+
         // Notify about deposit
         notify_incoming_transaction(ACTIVE_USER.name, a->account_id, amount, "deposit");
     }
@@ -345,7 +379,7 @@ void do_transaction(void)
             return;
         }
         a->balance -= amount;
-        
+
         if (a->balance < 100.0)
         {
             notify_low_balance(ACTIVE_USER.name, a->account_id, a->balance);
@@ -359,7 +393,7 @@ void do_transaction(void)
 
     if (!db_update_account(a))
     {
-        printf("Error saving transaction.\n");
+        printf("Error saving transaction...\n");
         return;
     }
 
@@ -411,7 +445,7 @@ void delete_account(void)
         return;
     }
 
-    printf("Account deleted successfully.\n");
+    printf("Account deleted successfully!\n");
 }
 
 // Transfer ownership
@@ -481,11 +515,11 @@ void transfer_ownership(void)
 
     if (!db_update_account(&accounts[acc_index]))
     {
-        printf("Error saving ownership transfer.\n");
+        printf("Error saving ownership transfer...\n");
         return;
     }
 
-    printf("Ownership transferred successfully.\n");
+    printf("Ownership transferred successfully!\n");
 
     notify_account_transfer(users[new_owner_index].name,
                             accounts[acc_index].account_id,
