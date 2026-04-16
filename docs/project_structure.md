@@ -7,31 +7,34 @@ Complete overview of all files and what they do.
 ```
 atm-management-system/
 ├── data/
-│   ├── atm.db              # SQLite database
-│   ├── records.txt         # Backup: accounts (not used)
-│   └── users.txt           # Backup: users (not used)
+│   ├── atm.db              # SQLite database (primary)
+│   ├── records.txt         # Text file for accounts (alternative)
+│   └── users.txt           # Text file for users (alternative)
 ├── docs/
-│   ├── architecture.md     # How the system works
+│   ├── architecture.md     # System design and flows
 │   ├── audit_guide.md      # Testing checklist
 │   ├── prd.md              # Requirements
 │   ├── project_structure.md # This file
-│   └── storage_implementation.md # Database details
+│   └── storage_implementation.md # Storage details
 ├── include/
 │   ├── accounts.h          # Account functions
 │   ├── auth.h              # Login/register functions
 │   ├── crypto.h            # Password hashing
 │   ├── db.h                # Database functions
-│   ├── io.h                # File operations (not used)
+│   ├── io.h                # File operations
 │   ├── models.h            # Data structures
 │   ├── notify.h            # Notifications
 │   ├── tui.h               # Terminal colors
 │   └── utils.h             # Helper functions
+├── scripts/
+│   ├── migrate_to_textfiles.sh  # Switch to text files
+│   └── migrate_to_sqlite.sh     # Switch to SQLite
 ├── src/
 │   ├── accounts.c          # Account operations
 │   ├── auth.c              # Login/register
 │   ├── crypto.c            # Password hashing
 │   ├── db.c                # Database operations
-│   ├── io.c                # File operations (not used)
+│   ├── io.c                # File operations
 │   ├── main.c              # Program entry point
 │   ├── notify.c            # Notifications
 │   ├── tui.c               # Terminal UI
@@ -222,7 +225,7 @@ IS_LOGGED_IN  - True/false login status
 
 **Purpose:** File operations (alternative to database)
 
-**Status:** Not currently used, kept for future
+**Status:** Not currently used, available for text file mode
 
 **Functions:**
 - `load_users()` - Read users.txt
@@ -230,6 +233,8 @@ IS_LOGGED_IN  - True/false login status
 - `load_accounts()` - Read records.txt
 - `rewrite_accounts()` - Update records.txt
 - `append_account()` - Add to records.txt
+
+**Usage:** Activated when using `migrate_to_textfiles.sh` script
 
 ---
 
@@ -269,7 +274,7 @@ IS_LOGGED_IN  - True/false login status
 
 ### data/atm.db
 
-**What it is:** SQLite database file
+**What it is:** SQLite database file (primary storage)
 
 **Contains:**
 - users table
@@ -280,7 +285,7 @@ IS_LOGGED_IN  - True/false login status
 
 ### data/users.txt
 
-**What it is:** Text file backup (not used)
+**What it is:** Text file for users (alternative storage)
 
 **Format:** `id name password`
 
@@ -290,9 +295,11 @@ IS_LOGGED_IN  - True/false login status
 1 Marcus q1w2e3r4t5y6
 ```
 
+**Status:** Used only when switched to text file mode
+
 ### data/records.txt
 
-**What it is:** Text file backup (not used)
+**What it is:** Text file for accounts (alternative storage)
 
 **Format:** `id user_id username account_id date country phone balance type`
 
@@ -301,15 +308,58 @@ IS_LOGGED_IN  - True/false login status
 0 0 Alice 100 10/10/2020 USA 1234567890 1001.20 savings
 ```
 
+**Status:** Used only when switched to text file mode
+
+---
+
+## Scripts Directory
+
+### scripts/migrate_to_textfiles.sh
+
+**Purpose:** Switch from SQLite to text file storage
+
+**What it does:**
+1. Creates backups of current files (.sqlite_backup)
+2. Updates source code to use io.c instead of db.c
+3. Disables notification system
+4. Removes SQLite linking from Makefile
+5. Rebuilds project
+
+**Usage:**
+```bash
+./scripts/migrate_to_textfiles.sh
+```
+
+**Note:** Notifications are disabled in text file mode
+
+---
+
+### scripts/migrate_to_sqlite.sh
+
+**Purpose:** Switch back to SQLite database storage
+
+**What it does:**
+1. Restores files from backups
+2. Re-enables notification system
+3. Restores SQLite linking
+4. Rebuilds project
+
+**Usage:**
+```bash
+./scripts/migrate_to_sqlite.sh
+```
+
+**Note:** Requires backups created by migrate_to_textfiles.sh
+
 ---
 
 ## Documentation Directory
 
 ### architecture.md
-How the system is designed and how it works
+System design and execution flows (147 lines)
 
 ### audit_guide.md
-Step-by-step testing instructions
+Step-by-step testing instructions with 18 functional + 7 bonus tests
 
 ### prd.md
 Product requirements and features
@@ -318,7 +368,7 @@ Product requirements and features
 This file - explains all files
 
 ### storage_implementation.md
-Database vs text files comparison
+Storage systems comparison and migration guide (61 lines)
 
 ---
 
@@ -333,6 +383,7 @@ Database vs text files comparison
 - *.o files
 - *.db files
 - Temporary files
+- Backup files (*.sqlite_backup)
 
 ### LICENSE
 
@@ -365,6 +416,8 @@ Database vs text files comparison
 - Description
 - Features
 - How to run
+- Storage systems
+- Migration scripts
 - Usage examples
 - Documentation links
 
@@ -379,9 +432,9 @@ Calls auth.c (register/login)
   ↓
 Calls accounts.c (operations)
   ↓
-Calls db.c (save/load)
+Calls db.c (save/load) OR io.c (text files)
   ↓
-Calls notify.c (notifications)
+Calls notify.c (notifications - SQLite only)
   ↓
 Uses tui.c (colors)
   ↓
@@ -395,24 +448,17 @@ Uses crypto.c (passwords)
 ## Summary
 
 **9 source files** - Each does one thing
-- main.c - Menu loop
-- auth.c - Users
-- accounts.c - Accounts
-- db.c - Database
-- notify.c - Notifications
-- crypto.c - Passwords
-- tui.c - Colors
-- utils.c - Helpers
-- io.c - Files (backup)
 
 **9 header files** - Function declarations
 
-**1 database** - atm.db (SQLite)
+**2 migration scripts** - Switch storage modes
+
+**1 database** - atm.db (SQLite mode)
+
+**2 text files** - users.txt, records.txt (text file mode)
 
 **5 docs** - Explain everything
 
 **1 Makefile** - Build automation
 
-**Total: 28 files**
-
-Everything is organized, simple, and easy to understand.
+**Total: 30 files**

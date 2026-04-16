@@ -1,6 +1,6 @@
 # ATM Management System
 
-[![C Language](https://img.shields.io/badge/C-11-00599C?style=for-the-badge&logo=c&logoColor=white)](https://www.c-language.org/)
+[![C Language](https://img.shields.io/badge/C-11-00599C?style=for-the-badge&logo=c&logoColor=white)](https://en.cppreference.com/w/c)
 [![Zone01](https://img.shields.io/badge/Zone01-Athens-FF6B35?style=for-the-badge&logo=42&logoColor=white)](https://zone01.gr/)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
 
@@ -14,6 +14,7 @@ A command-line banking application in C demonstrating file I/O, database operati
 - [How to Run](#how-to-run)
 - [Requirements](#requirements)
 - [Usage](#usage)
+- [Storage Systems](#storage-systems)
 - [Documentation](#documentation)
 - [License](#license)
 
@@ -59,6 +60,7 @@ atm-management-system/
 ├── data/                    # Data storage
 ├── docs/                    # Documentation
 ├── include/                 # Header files
+├── scripts/                 # Migration scripts
 ├── src/                     # Source files
 ├── .gitignore
 ├── LICENSE
@@ -196,11 +198,42 @@ Date: 15/04/2024
 You will get $29.17 as interest on day 15 of every month.
 ```
 
+## Storage Systems
+
+The application supports two storage methods:
+
+### Current: SQLite Database (Default)
+
+- **File**: `data/atm.db`
+- **Features**: ACID transactions, notifications, fast queries
+- **Recommended**: Production use
+
+### Alternative: Text Files
+
+- **Files**: `data/users.txt`, `data/records.txt`
+- **Features**: Simple, human-readable
+- **Use case**: Learning, debugging
+
+### Switching Storage Methods
+
+**Switch to text files:**
+```bash
+./scripts/migrate_to_textfiles.sh
+```
+
+**Switch back to SQLite:**
+```bash
+./scripts/migrate_to_sqlite.sh
+```
+
+**Note**: Text file mode disables notifications (requires SQLite).
+
 ## Documentation
 
 - [Architecture](docs/architecture.md) - System design and execution flows
 - [Project Structure](docs/project_structure.md) - File descriptions and repository layout
 - [Storage Implementation](docs/storage_implementation.md) - Database and file I/O details
+- [Audit Guide](docs/audit_guide.md) - Testing checklist and requirements
 
 ## License
 
