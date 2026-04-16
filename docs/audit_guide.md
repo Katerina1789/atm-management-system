@@ -72,7 +72,7 @@ This document provides the official audit checklist for the ATM Management Syste
 
 **Test:**
 1. Create two accounts with the user Alice
-2. Select the option "Update information of account"
+2. Select the option "Update Account"
 3. Select an account number that does not exist for Alice
 
 **Question:** Did the application display some kind of error message stating that this account does not exist?
@@ -84,7 +84,7 @@ This document provides the official audit checklist for the ATM Management Syste
 ### 6. Update account prompt
 
 **Test:**
-1. Resorting to the user Alice, try and select the option "Update information of account"
+1. Resorting to the user Alice, try and select the option "Update Account"
 2. Select one of the accounts you created for Alice
 
 **Question:** Did the application prompt a choice of updating the phone number or the country?
@@ -113,7 +113,7 @@ This document provides the official audit checklist for the ATM Management Syste
 ### 8. Update country
 
 **Test:**
-1. Resorting to the user Alice, try and select the option "Update information of account"
+1. Resorting to the user Alice, try and select the option "Update Account"
 2. Select one of the accounts you created for Alice
 3. Then update the country of that account
 
@@ -131,13 +131,13 @@ This document provides the official audit checklist for the ATM Management Syste
 
 **Test:**
 1. Resorting to the user Alice, try to create a new account with:
-   - Date: `10/10/2012`
    - Account number: `834213`
+   - Date: `10/10/2012`
    - Country: `UK`
    - Phone number: `291231392`
    - Deposit amount: `$1001.20`
    - Type of account: `savings`
-2. Then select "Check accounts" and choose the account you just created
+2. Then select "Account Details" and choose the account you just created
 
 **Question:** Did the application display the account information and the gain of $5.84 of interest on day 10 of every month?
 
@@ -152,7 +152,7 @@ This document provides the official audit checklist for the ATM Management Syste
    - Account number: `320421`
    - Type of account: `fixed01`
    - Rest of the information as in the last account
-2. Then select "Check accounts" and choose the account you just created
+2. Then select "Account Details" and choose the account you just created
 
 **Question:** Did the application display the account information and the gain of $40.05 of interest on 10/10/2013?
 
@@ -167,7 +167,7 @@ This document provides the official audit checklist for the ATM Management Syste
    - Account number: `3214`
    - Type of account: `fixed02`
    - Rest of the information as in the last account
-2. Then select "Check accounts" and choose the account you just created
+2. Then select "Account Details" and choose the account you just created
 
 **Question:** Did the application display the account information and the gain of $100.12 of interest on 10/10/2014?
 
@@ -182,7 +182,7 @@ This document provides the official audit checklist for the ATM Management Syste
    - Account number: `3212`
    - Type of account: `fixed03`
    - Rest of the information as in the last account
-2. Then select "Check accounts" and choose the account you just created
+2. Then select "Account Details" and choose the account you just created
 
 **Question:** Did the application display the account information and the gain of $240.29 of interest on 10/10/2015?
 
@@ -193,7 +193,7 @@ This document provides the official audit checklist for the ATM Management Syste
 ### 13. Fixed account transaction block
 
 **Test:**
-1. Resorting to the user Alice select the option "Make transaction"
+1. Resorting to the user Alice select the option "Transaction"
 2. Then choose the account with the id `3212`
 
 **Question:** Was an error message displayed stating it is not possible to withdraw or deposit for "fixed" accounts?
@@ -205,7 +205,7 @@ This document provides the official audit checklist for the ATM Management Syste
 ### 14. Withdraw money
 
 **Test:**
-1. Resorting to the user Alice select the option "Make transaction"
+1. Resorting to the user Alice select the option "Transaction"
 2. Choose the account with the id `834213`
 3. Then try to withdraw money
 
@@ -247,7 +247,7 @@ This document provides the official audit checklist for the ATM Management Syste
 ### 16. Remove accounts
 
 **Test:**
-1. Resorting to the user Alice try to select the option "Remove existing account"
+1. Resorting to the user Alice try to select the option "Delete account"
 2. Remove the accounts `834213`, `320421` and `3214`
 
 **Question:** Can you confirm that those account were deleted, both in the application and data storage (text file `records.txt` or database)?
@@ -263,7 +263,7 @@ This document provides the official audit checklist for the ATM Management Syste
 ### 17. Remove non-existent account
 
 **Test:**
-1. Resorting to the user Alice select the option "Remove existing account"
+1. Resorting to the user Alice select the option "Delete account"
 2. Try to remove an account that does not exist
 
 **Question:** Did the application prompt some type of error saying that the account does not exist?
@@ -276,7 +276,7 @@ This document provides the official audit checklist for the ATM Management Syste
 
 **Test:**
 1. Create another user named `Michel`
-2. Then by using Alice select the option "transfer owner"
+2. Then by using Alice select the option "Transfer Ownership"
 3. Try to transfer ownership of the account `3212` to Michel
 
 **Question:** Were you able to transfer the ownership of this account to Michel? And if so did it update both application and data storage (text file `records.txt` or database)?

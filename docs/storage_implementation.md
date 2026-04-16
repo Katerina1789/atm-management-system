@@ -44,16 +44,6 @@ Use the provided scripts to switch between SQLite and text files:
 
 **Note:** Switching to text files disables the notification system (requires SQLite).
 
-## Comparison
-
-| Feature | SQLite | Text Files |
-|---------|--------|------------|
-| Speed | Fast | Slow |
-| Safety | ACID | None |
-| Dependencies | libsqlite3 | None |
-| Notifications | Yes | No |
-| Recommended | ✅ | Learning only |
-
 ## Summary
 
 **Current:** SQLite (production-ready)  
