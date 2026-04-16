@@ -57,12 +57,13 @@ ATM Management System is a terminal-based banking application that allows users 
 
 ```
 atm-management-system/
+├── audit/                   # Audit checklist 
 ├── data/                    # Data storage
 ├── docs/                    # Documentation
 ├── include/                 # Header files
-├── scripts/                 # Migration scripts
 ├── src/                     # Source files
 ├── .gitignore
+├── CONTRIBUTING.md
 ├── LICENSE
 ├── Makefile
 └── README.md
@@ -214,7 +215,7 @@ The application supports two storage methods:
 - **Features**: Simple, human-readable
 - **Use case**: Learning, debugging
 
-### Switching Storage Methods
+### Switching Storage Methods (not currently supported)
 
 **Switch to text files:**
 ```bash
@@ -232,8 +233,8 @@ The application supports two storage methods:
 
 - [Architecture](docs/architecture.md) - System design and execution flows
 - [Project Structure](docs/project_structure.md) - File descriptions and repository layout
-- [Storage Implementation](docs/storage_implementation.md) - Database and file I/O details
-- [Audit Guide](docs/audit_guide.md) - Testing checklist and requirements
+- [Audit Guide](./audit/audit_guide.md) - Testing checklist and requirements
+- [Contributing](CONTRIBUTING.md) - Contribution guidelines
 
 ## License
 

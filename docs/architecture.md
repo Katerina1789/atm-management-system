@@ -51,7 +51,7 @@ Username → Find user → Verify password → Set session → Init notification
 
 ### Create Account
 ```
-Logged in? → Input details → Validate → Save → Done
+Logged in? → Input details → Validate (date, country, phone, type) → Save → Done
 ```
 
 ### Transaction
@@ -92,7 +92,8 @@ db.c        → Database operations (SQLite)
 notify.c    → Notifications
 crypto.c    → Password hashing (FNV-1a)
 tui.c       → Colors and display
-utils.c     → Input helpers
+utils.c     → Input helpers and validation
+io.c        → File operations (reference only)
 ```
 
 ## Database Tables
@@ -106,7 +107,11 @@ utils.c     → Input helpers
 - Password hashing (FNV-1a)
 - Ownership checks on all operations
 - SQL injection prevention (prepared statements)
-- Input validation
+- Input validation:
+  - Date format (DD/MM/YYYY with leap year)
+  - Account type (5 valid types)
+  - Country name (180+ valid countries)
+  - Phone number (exactly 10 digits)
 
 ## Error Handling
 
@@ -114,7 +119,7 @@ Every operation checks:
 1. User logged in?
 2. Resource exists?
 3. User owns it?
-4. Input valid?
+4. Input valid? (format, type, range)
 5. Operation succeeded?
 
 If any fails → Show error → Return to menu

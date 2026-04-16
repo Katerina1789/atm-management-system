@@ -6,16 +6,15 @@ Complete overview of all files and what they do.
 
 ```
 atm-management-system/
+├── audit/
+│   └── audit_guide.md      # Testing checklist
 ├── data/
-│   ├── atm.db              # SQLite database (primary)
-│   ├── records.txt         # Text file for accounts (alternative)
-│   └── users.txt           # Text file for users (alternative)
+│   ├── records.txt         # Text file for accounts (reference)
+│   └── users.txt           # Text file for users (reference)
 ├── docs/
 │   ├── architecture.md     # System design and flows
-│   ├── audit_guide.md      # Testing checklist
-│   ├── prd.md              # Requirements
-│   ├── project_structure.md # This file
-│   └── storage_implementation.md # Storage details
+│   ├── prd.md              # Product requirements
+│   └── project_structure.md # This file
 ├── include/
 │   ├── accounts.h          # Account functions
 │   ├── auth.h              # Login/register functions
@@ -26,9 +25,6 @@ atm-management-system/
 │   ├── notify.h            # Notifications
 │   ├── tui.h               # Terminal colors
 │   └── utils.h             # Helper functions
-├── scripts/
-│   ├── migrate_to_textfiles.sh  # Switch to text files
-│   └── migrate_to_sqlite.sh     # Switch to SQLite
 ├── src/
 │   ├── accounts.c          # Account operations
 │   ├── auth.c              # Login/register
@@ -40,6 +36,7 @@ atm-management-system/
 │   ├── tui.c               # Terminal UI
 │   └── utils.c             # Helper functions
 ├── .gitignore              # Git ignore rules
+├── CONTRIBUTING.md         # Contribution guidelines
 ├── LICENSE                 # MIT License
 ├── Makefile                # Build instructions
 └── README.md               # Project overview
@@ -213,19 +210,26 @@ IS_LOGGED_IN  - True/false login status
 - `read_line()` - Get user input safely
 - `is_number()` - Check if string is number
 - `trim_newline()` - Remove newline character
+- `clear_input_buffer()` - Flush stdin
+- `clear_screen()` - Simple screen spacing
+- `is_valid_date()` - Validate DD/MM/YYYY format with leap year
+- `is_valid_account_type()` - Validate account type (5 types)
+- `is_valid_country()` - Validate country name (180+ countries)
+- `is_valid_phone()` - Validate phone number (10 digits)
 
 **How it works:**
 - Prevents buffer overflow
 - Validates input
 - Cleans up strings
+- Comprehensive validation for user inputs
 
 ---
 
 ### io.h + io.c
 
-**Purpose:** File operations (alternative to database)
+**Purpose:** File operations (reference implementation)
 
-**Status:** Not currently used, available for text file mode
+**Status:** Reference only - project uses SQLite (db.c)
 
 **Functions:**
 - `load_users()` - Read users.txt
@@ -234,7 +238,7 @@ IS_LOGGED_IN  - True/false login status
 - `rewrite_accounts()` - Update records.txt
 - `append_account()` - Add to records.txt
 
-**Usage:** Activated when using `migrate_to_textfiles.sh` script
+**Usage:** Kept in codebase for educational purposes and as reference for file I/O operations
 
 ---
 
@@ -283,9 +287,11 @@ IS_LOGGED_IN  - True/false login status
 
 **Created by:** `db_init()` on first run
 
+**Note:** Not tracked in Git (.gitignore)
+
 ### data/users.txt
 
-**What it is:** Text file for users (alternative storage)
+**What it is:** Text file for users (reference implementation)
 
 **Format:** `id name password`
 
@@ -295,11 +301,11 @@ IS_LOGGED_IN  - True/false login status
 1 Marcus q1w2e3r4t5y6
 ```
 
-**Status:** Used only when switched to text file mode
+**Status:** Reference only - project uses SQLite
 
 ### data/records.txt
 
-**What it is:** Text file for accounts (alternative storage)
+**What it is:** Text file for accounts (reference implementation)
 
 **Format:** `id user_id username account_id date country phone balance type`
 
@@ -308,67 +314,27 @@ IS_LOGGED_IN  - True/false login status
 0 0 Alice 100 10/10/2020 USA 1234567890 1001.20 savings
 ```
 
-**Status:** Used only when switched to text file mode
+**Status:** Reference only - project uses SQLite
 
 ---
 
-## Scripts Directory
+## Audit Directory
 
-### scripts/migrate_to_textfiles.sh
-
-**Purpose:** Switch from SQLite to text file storage
-
-**What it does:**
-1. Creates backups of current files (.sqlite_backup)
-2. Updates source code to use io.c instead of db.c
-3. Disables notification system
-4. Removes SQLite linking from Makefile
-5. Rebuilds project
-
-**Usage:**
-```bash
-./scripts/migrate_to_textfiles.sh
-```
-
-**Note:** Notifications are disabled in text file mode
-
----
-
-### scripts/migrate_to_sqlite.sh
-
-**Purpose:** Switch back to SQLite database storage
-
-**What it does:**
-1. Restores files from backups
-2. Re-enables notification system
-3. Restores SQLite linking
-4. Rebuilds project
-
-**Usage:**
-```bash
-./scripts/migrate_to_sqlite.sh
-```
-
-**Note:** Requires backups created by migrate_to_textfiles.sh
+### audit_guide.md
+Step-by-step testing instructions with 18 functional + 7 bonus tests
 
 ---
 
 ## Documentation Directory
 
 ### architecture.md
-System design and execution flows (147 lines)
-
-### audit_guide.md
-Step-by-step testing instructions with 18 functional + 7 bonus tests
+System design and execution flows (140 lines)
 
 ### prd.md
-Product requirements and features
+Product requirements and project approach
 
 ### project_structure.md
 This file - explains all files
-
-### storage_implementation.md
-Storage systems comparison and migration guide (61 lines)
 
 ---
 
@@ -384,6 +350,17 @@ Storage systems comparison and migration guide (61 lines)
 - *.db files
 - Temporary files
 - Backup files (*.sqlite_backup)
+
+### CONTRIBUTING.md
+
+**What it is:** Contribution guidelines
+
+**Contains:**
+- Getting started (fork, clone, branch)
+- Code guidelines
+- Commit message format
+- Testing instructions
+- Pull request process
 
 ### LICENSE
 
@@ -417,9 +394,9 @@ Storage systems comparison and migration guide (61 lines)
 - Features
 - How to run
 - Storage systems
-- Migration scripts
 - Usage examples
 - Documentation links
+- Contributing guidelines
 
 ---
 
@@ -432,15 +409,17 @@ Calls auth.c (register/login)
   ↓
 Calls accounts.c (operations)
   ↓
-Calls db.c (save/load) OR io.c (text files)
+Calls db.c (save/load)
   ↓
-Calls notify.c (notifications - SQLite only)
+Calls notify.c (notifications)
   ↓
 Uses tui.c (colors)
   ↓
 Uses utils.c (input)
   ↓
 Uses crypto.c (passwords)
+
+Note: io.c is available as reference for file I/O operations
 ```
 
 ---
@@ -451,14 +430,16 @@ Uses crypto.c (passwords)
 
 **9 header files** - Function declarations
 
-**2 migration scripts** - Switch storage modes
+**1 database** - atm.db (SQLite, created at runtime)
 
-**1 database** - atm.db (SQLite mode)
+**2 text files** - users.txt, records.txt (reference only)
 
-**2 text files** - users.txt, records.txt (text file mode)
+**3 docs** - architecture.md, prd.md, project_structure.md
 
-**5 docs** - Explain everything
+**1 audit guide** - audit_guide.md
 
 **1 Makefile** - Build automation
 
-**Total: 30 files**
+**1 CONTRIBUTING.md** - Contribution guide
+
+**Total: 28 files**
