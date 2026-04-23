@@ -95,6 +95,21 @@ int login_user(void)
     return 1;
 }
 
+// Logout user
+void logout_user(void)
+{
+    if (!IS_LOGGED_IN)
+    {
+        printf("You are not logged in.\n");
+        return;
+    }
+
+    printf("Logging out %s...\n", ACTIVE_USER.name);
+    memset(&ACTIVE_USER, 0, sizeof(User));
+    IS_LOGGED_IN = 0;
+    printf("Logged out successfully.\n");
+}
+
 // Change password for logged-in user
 void change_password(void)
 {

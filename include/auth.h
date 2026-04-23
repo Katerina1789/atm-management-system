@@ -12,6 +12,9 @@ int register_user(void);
 // Login an existing user
 int login_user(void);
 
+// Logout current user
+void logout_user(void);
+
 // Change password for logged-in user
 void change_password(void);
 

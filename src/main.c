@@ -14,17 +14,21 @@ static void menu(void)
 
     printf("1. Register\n");
     printf("2. Login\n");
-    printf("3. Create Account\n");
-    printf("4. List Accounts\n");
-    printf("5. Update Account\n");
-    printf("6. Account Details\n");
-    printf("7. Transaction\n");
-    printf("8. Delete Account\n");
-    printf("9. Transfer Ownership\n");
     if (IS_LOGGED_IN)
     {
-        printf(COLOR_YELLOW "10. View Notifications\n" COLOR_RESET);
-        printf(COLOR_YELLOW "11. Change Password\n" COLOR_RESET);
+        printf(COLOR_YELLOW "3. Logout\n" COLOR_RESET);
+    }
+    printf("4. Create Account\n");
+    printf("5. List Accounts\n");
+    printf("6. Update Account\n");
+    printf("7. Account Details\n");
+    printf("8. Transaction\n");
+    printf("9. Delete Account\n");
+    printf("10. Transfer Ownership\n");
+    if (IS_LOGGED_IN)
+    {
+        printf(COLOR_YELLOW "11. View Notifications\n" COLOR_RESET);
+        printf(COLOR_YELLOW "12. Change Password\n" COLOR_RESET);
     }
     printf("0. Exit\n\n");
     printf("Choice: ");
@@ -60,41 +64,54 @@ int main(void)
             break;
 
         case 3:
+            if (IS_LOGGED_IN)
+            {
+                logout_user();
+                tui_pause();
+            }
+            else
+            {
+                create_account();
+                tui_pause();
+            }
+            break;
+
+        case 4:
             create_account();
             tui_pause();
             break;
 
-        case 4:
+        case 5:
             list_accounts();
             tui_pause();
             break;
 
-        case 5:
+        case 6:
             update_account();
             tui_pause();
             break;
 
-        case 6:
+        case 7:
             show_account_details();
             tui_pause();
             break;
 
-        case 7:
+        case 8:
             do_transaction();
             tui_pause();
             break;
 
-        case 8:
+        case 9:
             delete_account();
             tui_pause();
             break;
 
-        case 9:
+        case 10:
             transfer_ownership();
             tui_pause();
             break;
 
-        case 10:
+        case 11:
             if (IS_LOGGED_IN)
             {
                 view_all_notifications();
@@ -107,7 +124,7 @@ int main(void)
             }
             break;
 
-        case 11:
+        case 12:
             if (IS_LOGGED_IN)
             {
                 change_password();
