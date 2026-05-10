@@ -1,8 +1,8 @@
 # ATM Management System
 
-[![C Language](https://img.shields.io/badge/C-11-00599C?style=for-the-badge&logo=c&logoColor=white)](https://en.cppreference.com/w/c)
-[![Zone01](https://img.shields.io/badge/Zone01-Athens-FF6B35?style=for-the-badge&logo=42&logoColor=white)](https://zone01.gr/)
-[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![C Language](https://img.shields.io/badge/C-11-A8B9CC?style=for-the-badge&logo=c&logoColor=white)](https://en.cppreference.com/w/c)
+[![Zone01](https://img.shields.io/badge/Zone01-Athens-FF6B35?style=for-the-badge&logo=codeforces&logoColor=white)](https://zone01.gr/)
+[![License](https://img.shields.io/badge/License-MIT-4caf50?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
 
 A command-line banking application in C demonstrating file I/O, database operations, data structures, memory management, and clean architecture. Built as part of the Zone01 Athens curriculum.
 
